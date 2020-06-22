@@ -39,48 +39,6 @@ const tagsFromSearch = (query: string) => {
   return searchTags;
 };
 
-export const compareNotes = (
-  notes: Map<T.EntityId, SearchNote>,
-  sortType: T.SortType,
-  sortReversed: boolean
-) => (aId: T.EntityId, bId: T.EntityId): number => {
-  const reverser = sortReversed ? -1 : 1;
-
-  const a = notes.get(aId)!;
-  const b = notes.get(bId)!;
-
-  if (a.isPinned !== b.isPinned) {
-    return a.isPinned ? -1 : 1;
-  }
-
-  switch (sortType) {
-    case 'alphabetical': {
-      const lexicalCompare = a.content.localeCompare(b.content);
-
-      return (
-        reverser *
-        (lexicalCompare === 0 ? aId.localeCompare(bId) : lexicalCompare)
-      );
-    }
-
-    case 'modificationDate': {
-      const dateCompare = b.modificationDate - a.modificationDate;
-
-      return (
-        reverser * (dateCompare === 0 ? aId.localeCompare(bId) : dateCompare)
-      );
-    }
-
-    case 'creationDate': {
-      const dateCompare = b.creationDate - a.modificationDate;
-
-      return (
-        reverser * (dateCompare === 0 ? aId.localeCompare(bId) : dateCompare)
-      );
-    }
-  }
-};
-
 export const middleware: S.Middleware = (store) => {
   const searchState: SearchState = {
     hasSelectedFirstNote: false,

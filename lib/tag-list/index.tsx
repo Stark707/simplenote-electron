@@ -105,11 +105,15 @@ export class TagList extends Component<Props> {
       'tag-list-editing': this.props.editingTags,
     });
 
-    const sortedTags = sortTagsAlpha
-      ? [...tags.entries()].sort(([aId, aTag], [bId, bTag]) =>
-          aTag.name.localeCompare(bTag.name)
-        )
-      : [...tags.entries()];
+    const sortedTags = [...tags.entries()].sort(([aId, aTag], [bId, bTag]) =>
+      sortTagsAlpha
+        ? aTag.name.localeCompare(bTag.name)
+        : 'undefined' !== typeof aTag.index && 'undefined' !== typeof bTag.index
+        ? aTag.index - bTag.index
+        : 'undefined' === typeof aTag.index
+        ? 1
+        : -1
+    );
 
     return (
       <div className={classes}>
