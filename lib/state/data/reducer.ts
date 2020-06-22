@@ -22,6 +22,18 @@ export const notes: A.Reducer<Map<T.EntityId, T.Note>> = (
   action
 ) => {
   switch (action.type) {
+    case 'ADD_NOTE_TAG': {
+      const note = state.get(action.noteId);
+      if (!note) {
+        return state;
+      }
+
+      return new Map(state).set(action.noteId, {
+        ...note,
+        tags: [...note.tags, action.tagName],
+      });
+    }
+
     case 'CREATE_NOTE_WITH_ID':
       return new Map(state).set(action.noteId, {
         content: '',
@@ -133,6 +145,18 @@ export const notes: A.Reducer<Map<T.EntityId, T.Note>> = (
         : note.systemTags.filter((tag) => tag !== 'published');
 
       return new Map(state).set(action.noteId, { ...note, systemTags });
+    }
+
+    case 'REMOVE_NOTE_TAG': {
+      const note = state.get(action.noteId);
+      if (!note) {
+        return state;
+      }
+
+      return new Map(state).set(action.noteId, {
+        ...note,
+        tags: note.tags.filter((tag) => tag !== action.tagName),
+      });
     }
 
     case 'RESTORE_NOTE':

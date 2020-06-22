@@ -122,6 +122,10 @@ export type WindowResize = Action<'WINDOW_RESIZE', { innerWidth: number }>;
 /*
  * Note operations
  */
+export type AddNoteTag = Action<
+  'ADD_NOTE_TAG',
+  { noteId: T.EntityId; tagName: string }
+>;
 export type DeleteNoteForever = Action<
   'DELETE_NOTE_FOREVER',
   { noteId: T.EntityId }
@@ -146,6 +150,10 @@ export type PinNote = Action<
 export type PublishNote = Action<
   'PUBLISH_NOTE',
   { noteId: T.EntityId; shouldPublish: boolean }
+>;
+export type RemoveNoteTag = Action<
+  'REMOVE_NOTE_TAG',
+  { noteId: T.EntityId; tagName: string }
 >;
 export type RestoreNote = Action<'RESTORE_NOTE', { noteId: T.EntityId }>;
 export type RestoreNoteRevision = Action<
@@ -220,6 +228,7 @@ export type SubmitPendingChange = Action<
 
 export type ActionType =
   | AcknowledgePendingChange
+  | AddNoteTag
   | ChangeConnectionStatus
   | CloseNote
   | CloseDialog
@@ -249,6 +258,7 @@ export type ActionType =
   | RemoteTagDelete
   | RemoteTagUpdate
   | RemoveNoteGhost
+  | RemoveNoteTag
   | ResetFontSize
   | RestoreOpenNote
   | RestoreNote

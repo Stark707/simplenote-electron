@@ -14,7 +14,6 @@ import TagInput from '../tag-input';
 import classNames from 'classnames';
 import analytics from '../analytics';
 import { invoke, negate } from 'lodash';
-import actions from '../state/actions';
 
 import * as S from '../state';
 import * as T from '../types';
@@ -38,7 +37,8 @@ type StateProps = {
 };
 
 type DispatchProps = {
-  editNote: (noteId: T.EntityId, changes: Partial<T.Note>) => any;
+  addTag: (noteId: T.EntityId, tagName: string) => any;
+  removeTag: (noteId: T.EntityId, tagName: string) => any;
 };
 
 type Props = OwnProps & DispatchProps & StateProps;
@@ -98,10 +98,9 @@ export class TagField extends Component<Props, OwnState> {
       }
 
       sameTags.add(tag.toLocaleLowerCase());
-      nextTags.push(tag);
+      this.props.addTag(noteId, tag);
     });
 
-    this.props.editNote(noteId, { tags: nextTags });
     this.storeTagInput('');
     invoke(this, 'tagInput.focus');
     analytics.tracks.recordEvent('editor_tag_added');
@@ -114,11 +113,7 @@ export class TagField extends Component<Props, OwnState> {
     const { note, noteId } = this.props;
     const { selectedTag } = this.state;
 
-    this.props.editNote(noteId, {
-      tags: note.tags.filter(
-        (tag) => tag.toLocaleLowerCase() !== tagName.toLocaleLowerCase()
-      ),
-    });
+    this.props.removeTag(noteId, tagName);
 
     if (selectedTag === tagName) {
       this.setState({ selectedTag: '' }, () => this.tagInput?.current?.focus());
@@ -294,5 +289,14 @@ const mapStateToProps: S.MapState<StateProps> = (state) => ({
 });
 
 export default connect(mapStateToProps, {
-  editNote: actions.data.editNote,
+  addTag: (noteId, tagName) => ({
+    type: 'ADD_NOTE_TAG',
+    noteId,
+    tagName,
+  }),
+  removeTag: (noteId, tagName) => ({
+    type: 'REMOVE_NOTE_TAG',
+    noteId,
+    tagName,
+  }),
 } as S.MapDispatch<DispatchProps>)(TagField);

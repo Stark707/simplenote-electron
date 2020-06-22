@@ -214,12 +214,36 @@ export const initSimperium = (
     changedNotes.set(noteId, timer);
   };
 
+  const changedTags = new Map<T.EntityId, any>();
+  const queueTagUpdate = (tagId: T.EntityId) => {
+    if (changedTags.has(tagId)) {
+      clearTimeout(changedTags.get(tagId));
+    }
+
+    const timer = setTimeout(() => tagBucket.touch(tagId), 2000);
+    changedTags.set(tagId, timer);
+  };
+
   return (next) => (action: A.ActionType) => {
     console.log(action);
+    const prevState = store.getState();
     const result = next(action);
     const nextState = store.getState();
 
     switch (action.type) {
+      case 'ADD_NOTE_TAG':
+        if (prevState.data.tags[1].has(action.tagName.toLocaleLowerCase())) {
+          queueTagUpdate(
+            nextState.data.tags[1].get(action.tagName.toLocaleLowerCase())
+          );
+        } else {
+          tagBucket.add(
+            nextState.data.tags[1].get(action.tagName.toLocaleLowerCase())
+          );
+        }
+        queueNoteUpdate(action.noteId);
+        return result;
+
       // while editing we should debounce
       // updates to prevent thrashing
       case 'CREATE_NOTE_WITH_ID':
