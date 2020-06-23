@@ -26,6 +26,7 @@ type StateProps = {
 type DispatchProps = {
   onEditTags: () => any;
   openTag: (tagId: T.EntityId) => any;
+  renameTag: (oldTagName: string, newTagName: string) => any;
   reorderTag: (tagName: string, newIndex: number) => any;
   trashTag: (tagName: string) => any;
 };
@@ -39,6 +40,7 @@ const SortableTag = SortableElement(
     allowReordering,
     editingActive,
     isSelected,
+    renameTag,
     selectTag,
     trashTag,
     value: [tagId, tag],
@@ -46,6 +48,7 @@ const SortableTag = SortableElement(
     allowReordering: boolean;
     editingActive: boolean;
     isSelected: boolean;
+    renameTag: (oldTagName: string, newTagName: string) => any;
     selectTag: (tagId: T.EntityId) => any;
     trashTag: (tagName: string) => any;
     value: [T.EntityId, T.Tag];
@@ -55,8 +58,14 @@ const SortableTag = SortableElement(
       <TagListInput
         editable={editingActive}
         isSelected={isSelected}
-        onClick={() => selectTag(tagId)}
-        onDone={() => {}}
+        onClick={() => !editingActive && selectTag(tagId)}
+        onDone={(event) => {
+          const newTagName = event.target?.value;
+
+          if (newTagName && newTagName !== tag.name) {
+            renameTag(tag.name, newTagName);
+          }
+        }}
         value={tag.name}
       />
       {editingActive && allowReordering && <TagHandle />}
@@ -70,6 +79,7 @@ const SortableTagList = SortableContainer(
     items,
     openedTag,
     openTag,
+    renameTheTag,
     sortTagsAlpha,
     trashTheTag,
   }: {
@@ -77,6 +87,7 @@ const SortableTagList = SortableContainer(
     items: [T.EntityId, T.Tag][];
     openedTag: T.EntityId | null;
     openTag: (tagId: T.EntityId) => any;
+    renameTheTag: (oldTagName: string, newTagName: string) => any;
     sortTagsAlpha: boolean;
     trashTheTag: (tagName: string) => any;
   }) => (
@@ -88,6 +99,7 @@ const SortableTagList = SortableContainer(
           editingActive={editingTags}
           index={index}
           isSelected={openedTag === value[0]}
+          renameTag={renameTheTag}
           selectTag={openTag}
           trashTag={trashTheTag}
           value={value}
@@ -112,6 +124,7 @@ export class TagList extends Component<Props> {
       onEditTags,
       openTag,
       openedTag,
+      renameTag,
       sortTagsAlpha,
       tags,
       trashTag,
@@ -121,7 +134,7 @@ export class TagList extends Component<Props> {
       'tag-list-editing': this.props.editingTags,
     });
 
-    const sortedTags = [...tags.entries()].sort(([aId, aTag], [bId, bTag]) =>
+    const sortedTags = Array.from(tags).sort(([aId, aTag], [bId, bTag]) =>
       sortTagsAlpha
         ? aTag.name.localeCompare(bTag.name)
         : 'undefined' !== typeof aTag.index && 'undefined' !== typeof bTag.index
@@ -151,6 +164,7 @@ export class TagList extends Component<Props> {
           openedTag={openedTag}
           openTag={openTag}
           items={sortedTags}
+          renameTheTag={renameTag}
           sortTagsAlpha={sortTagsAlpha}
           onSortEnd={this.reorderTag}
           useDragHandle={true}
@@ -175,6 +189,11 @@ const mapStateToProps: S.MapState<StateProps> = ({
 const mapDispatchToProps: S.MapDispatch<DispatchProps> = {
   onEditTags: toggleTagEditing,
   openTag: openTag,
+  renameTag: (oldTagName, newTagName) => ({
+    type: 'RENAME_TAG',
+    oldTagName,
+    newTagName,
+  }),
   reorderTag: (tagName, newIndex) => ({
     type: 'REORDER_TAG',
     tagName,

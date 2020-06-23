@@ -21,7 +21,7 @@ const clearStorage = () =>
     indexedDB.deleteDatabase('ghost');
     indexedDB.deleteDatabase('simplenote');
     if (isElectron) {
-      window.electron.send('clearCookies');
+      window.electron?.send('clearCookies');
     }
 
     // let everything settle

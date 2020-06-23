@@ -309,6 +309,28 @@ export const tags: A.Reducer<[
         ];
       }
 
+    case 'RENAME_TAG': {
+      const tagId = tagNames.get(action.oldTagName.toLocaleLowerCase());
+      if (!tagId) {
+        return state;
+      }
+
+      const tag = tagIds.get(tagId);
+      if (!tag) {
+        return state;
+      }
+
+      const nextTags = new Map(tagIds).set(tagId, {
+        ...tag,
+        name: action.newTagName,
+      });
+      const nextNames = new Map(tagNames);
+      nextNames.delete(action.oldTagName);
+      nextNames.set(action.newTagName.toLocaleLowerCase(), tagId);
+
+      return [nextTags, nextNames];
+    }
+
     case 'REORDER_TAG': {
       const actionTagId = tagNames.get(action.tagName.toLocaleLowerCase());
       if (!actionTagId) {

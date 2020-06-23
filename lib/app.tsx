@@ -60,9 +60,9 @@ class AppComponent extends Component<Props> {
   static displayName = 'App';
 
   componentDidMount() {
-    window.electron.receive('appCommand', this.onAppCommand);
-    window.electron.send('setAutoHideMenuBar', this.props.autoHideMenuBar);
-    window.electron.send('settingsUpdate', this.props.settings);
+    window.electron?.receive('appCommand', this.onAppCommand);
+    window.electron?.send('setAutoHideMenuBar', this.props.autoHideMenuBar);
+    window.electron?.send('settingsUpdate', this.props.settings);
 
     this.toggleShortcuts(true);
 
@@ -77,7 +77,7 @@ class AppComponent extends Component<Props> {
     const { settings } = this.props;
 
     if (settings !== prevProps.settings) {
-      window.electron.send('settingsUpdate', settings);
+      window.electron?.send('settingsUpdate', settings);
     }
   }
 
@@ -142,7 +142,7 @@ class AppComponent extends Component<Props> {
     return true;
   };
 
-  onAppCommand = (event,) => {
+  onAppCommand = (event) => {
     if ('exportZipArchive' === event.action) {
       exportZipArchive();
     }
