@@ -76,12 +76,14 @@ export const NotePreview: FunctionComponent<Props> = ({
   }, []);
 
   useEffect(() => {
-    if (previewNode.current && note?.content) {
+    if (
+      previewNode.current &&
+      note?.content &&
+      note?.systemTags.includes('markdown')
+    ) {
       renderToNode(previewNode.current, note!.content, searchQuery);
     }
-  }, [note?.content, searchQuery]);
-
-  console.log(note);
+  }, [note?.content, note?.systemTags, searchQuery]);
 
   return (
     <div className="note-detail-wrapper">
@@ -91,7 +93,9 @@ export const NotePreview: FunctionComponent<Props> = ({
           className="note-detail-markdown theme-color-bg theme-color-fg"
           data-markdown-root
           style={{ fontSize: `${fontSize}px` }}
-        />
+        >
+          <div style={{ whiteSpace: 'pre' }}>{note?.content}</div>
+        </div>
       </div>
     </div>
   );

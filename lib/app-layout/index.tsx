@@ -37,6 +37,7 @@ type StateProps = {
   openedNote: T.EntityId | null;
   openedRevision: number | null;
   showNoteList: boolean;
+  showRevisions: boolean;
 };
 
 type DispatchProps = {
@@ -89,6 +90,7 @@ export class AppLayout extends Component<Props> {
       isSmallScreen,
       openedNote,
       openedRevision,
+      showRevisions,
     } = this.props;
 
     const mainClasses = classNames('app-layout', {
@@ -119,7 +121,7 @@ export class AppLayout extends Component<Props> {
             <div className="app-layout__note-column theme-color-bg theme-color-fg theme-color-border">
               {hasRevisions && <RevisionSelector />}
               <NoteToolbar />
-              {openedRevision ? (
+              {showRevisions ? (
                 <NotePreview noteId={openedNote} note={openedRevision} />
               ) : (
                 <NoteEditor />
@@ -150,6 +152,7 @@ const mapStateToProps: S.MapState<StateProps> = (state) => ({
       : null,
   openedNote: state.ui.openedNote,
   showNoteList: state.ui.showNoteList,
+  showRevisions: state.ui.showRevisions,
 });
 
 const mapDispatchToProps: S.MapDispatch<DispatchProps> = {
