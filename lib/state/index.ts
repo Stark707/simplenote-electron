@@ -14,8 +14,10 @@ import {
 } from 'redux';
 import persistState from 'redux-localstorage';
 import { omit } from 'lodash';
+import { isElectron } from '../utils/platform';
 
 import dataMiddleware from './data/middleware';
+import electronMiddleware from './electron/middleware';
 import { middleware as searchMiddleware } from '../search';
 import uiMiddleware from './ui/middleware';
 import searchFieldMiddleware from './ui/search-field-middleware';
@@ -63,6 +65,7 @@ export const makeStore = (...middlewares: Middleware[]) =>
         searchMiddleware,
         searchFieldMiddleware,
         uiMiddleware,
+        ...(isElectron ? [electronMiddleware] : []),
         ...middlewares
       )
     )

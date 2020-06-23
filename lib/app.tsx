@@ -6,7 +6,6 @@ import NavigationBar from './navigation-bar';
 import AppLayout from './app-layout';
 import DevBadge from './components/dev-badge';
 import DialogRenderer from './dialog-renderer';
-import exportZipArchive from './utils/export';
 import { isElectron, isMac } from './utils/platform';
 import classNames from 'classnames';
 import { createNote, closeNote, toggleNavigation } from './state/ui/actions';
@@ -36,22 +35,17 @@ type StateProps = {
 type DispatchProps = {
   closeNote: () => any;
   createNote: () => any;
-  decreaseFontSize: () => any;
   focusSearchField: () => any;
-  increaseFontSize: () => any;
   openTagList: () => any;
-  resetFontSize: () => any;
   setAccountName: (name: string) => any;
   setLineLength: (length: T.LineLength) => any;
   setNoteDisplay: (displayMode: T.ListDisplayMode) => any;
   setSortType: (sortType: T.SortType) => any;
-  showDialog: (type: T.DialogType) => any;
   toggleAutoHideMenuBar: () => any;
   toggleFocusMode: () => any;
   toggleSortOrder: () => any;
   toggleSortTagsAlpha: () => any;
   toggleSpellCheck: () => any;
-  trashNote: () => any;
 };
 
 type Props = OwnProps & StateProps & DispatchProps;
@@ -60,9 +54,7 @@ class AppComponent extends Component<Props> {
   static displayName = 'App';
 
   componentDidMount() {
-    window.electron?.receive('appCommand', this.onAppCommand);
     window.electron?.send('setAutoHideMenuBar', this.props.autoHideMenuBar);
-    window.electron?.send('settingsUpdate', this.props.settings);
 
     this.toggleShortcuts(true);
 
@@ -71,14 +63,6 @@ class AppComponent extends Component<Props> {
 
   componentWillUnmount() {
     this.toggleShortcuts(false);
-  }
-
-  componentDidUpdate(prevProps) {
-    const { settings } = this.props;
-
-    if (settings !== prevProps.settings) {
-      window.electron?.send('settingsUpdate', settings);
-    }
   }
 
   handleShortcut = (event: KeyboardEvent) => {
@@ -140,46 +124,6 @@ class AppComponent extends Component<Props> {
     }
 
     return true;
-  };
-
-  onAppCommand = (event) => {
-    if ('exportZipArchive' === event.action) {
-      exportZipArchive();
-    }
-
-    if ('printNote' === event.action) {
-      return window.print();
-    }
-
-    if ('focusSearchField' === event.action) {
-      return this.props.focusSearchField();
-    }
-
-    if ('showDialog' === event.action) {
-      return this.props.showDialog(event.dialog);
-    }
-
-    if ('trashNote' === event.action) {
-      return this.props.trashNote();
-    }
-
-    if ('newNote' === event.action) {
-      return this.props.createNote();
-    }
-
-    if ('increaseFontSize' === event.action) {
-      return this.props.increaseFontSize();
-    }
-
-    if ('decreaseFontSize' === event.action) {
-      return this.props.decreaseFontSize();
-    }
-
-    if ('resetFontSize' === event.action) {
-      return this.props.resetFontSize();
-    }
-
-    console.log(event.action);
   };
 
   toggleShortcuts = (doEnable: boolean) => {
@@ -244,24 +188,19 @@ const mapDispatchToProps: S.MapDispatch<DispatchProps> = (dispatch) => {
       dispatch(settingsActions.activateTheme(theme)),
     closeNote: () => dispatch(closeNote()),
     createNote: () => dispatch(createNote()),
-    decreaseFontSize: () => dispatch(settingsActions.decreaseFontSize()),
     focusSearchField: () => dispatch(actions.ui.focusSearchField()),
-    increaseFontSize: () => dispatch(settingsActions.increaseFontSize()),
     openTagList: () => dispatch(toggleNavigation()),
-    resetFontSize: () => dispatch(settingsActions.resetFontSize()),
     setAccountName: (name) => dispatch(settingsActions.setAccountName(name)),
     setLineLength: (length) => dispatch(settingsActions.setLineLength(length)),
     setNoteDisplay: (displayMode) =>
       dispatch(settingsActions.setNoteDisplay(displayMode)),
     setSortType: (sortType) => dispatch(settingsActions.setSortType(sortType)),
-    showDialog: (dialog) => dispatch(actions.ui.showDialog(dialog)),
     toggleAutoHideMenuBar: () =>
       dispatch(settingsActions.toggleAutoHideMenuBar()),
     toggleFocusMode: () => dispatch(settingsActions.toggleFocusMode()),
     toggleSortOrder: () => dispatch(settingsActions.toggleSortOrder()),
     toggleSortTagsAlpha: () => dispatch(settingsActions.toggleSortTagsAlpha()),
     toggleSpellCheck: () => dispatch(settingsActions.toggleSpellCheck()),
-    trashNote: () => dispatch(actions.ui.trashOpenNote()),
   };
 };
 
