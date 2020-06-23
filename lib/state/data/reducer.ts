@@ -305,6 +305,38 @@ export const tags: A.Reducer<[
         ];
       }
 
+    case 'REORDER_TAG': {
+      const actionTagId = tagNames.get(action.tagName.toLocaleLowerCase());
+      if (!actionTagId) {
+        return state;
+      }
+
+      const actionTag = tagIds.get(actionTagId);
+      if (!actionTag) {
+        return state;
+      }
+
+      const nextTags = new Map(tagIds);
+      nextTags.delete(actionTagId);
+      ([...nextTags.entries()] as [T.EntityId, T.Tag][])
+        .sort((a, b) =>
+          'undefined' !== typeof a[1].index && 'undefined' !== typeof b[1].index
+            ? a[1].index - b[1].index
+            : 'undefined' === typeof a[1].index
+            ? 1
+            : -1
+        )
+        .forEach(([tagId, tag], index) => {
+          nextTags.set(tagId, {
+            ...tag,
+            index: index < action.newIndex ? index : index + 1,
+          });
+        });
+      nextTags.set(actionTagId, { ...actionTag, index: action.newIndex });
+
+      return [nextTags, tagNames];
+    }
+
     default:
       return state;
   }

@@ -220,7 +220,7 @@ export const initSimperium = (
       clearTimeout(changedTags.get(tagId));
     }
 
-    const timer = setTimeout(() => tagBucket.touch(tagId), 2000);
+    const timer = setTimeout(() => tagBucket.touch(tagId), 20);
     changedTags.set(tagId, timer);
   };
 
@@ -322,6 +322,13 @@ export const initSimperium = (
 
       case 'DELETE_NOTE_FOREVER':
         setTimeout(() => noteBucket.remove(action.noteId), 10);
+        return result;
+
+      case 'REORDER_TAG':
+        // if one tag changes order we likely have to synchronize all tags…
+        nextState.data.tags[0].forEach((tag, tagId) => {
+          queueTagUpdate(tagId);
+        });
         return result;
 
       case 'LOGOUT':

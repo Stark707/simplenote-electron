@@ -155,6 +155,10 @@ export type RemoveNoteTag = Action<
   'REMOVE_NOTE_TAG',
   { noteId: T.EntityId; tagName: string }
 >;
+export type ReorderTag = Action<
+  'REORDER_TAG',
+  { tagName: string; newIndex: number }
+>;
 export type RestoreNote = Action<'RESTORE_NOTE', { noteId: T.EntityId }>;
 export type RestoreNoteRevision = Action<
   'RESTORE_NOTE_REVISION',
@@ -269,6 +273,7 @@ export type ActionType =
   | RemoteTagUpdate
   | RemoveNoteGhost
   | RemoveNoteTag
+  | ReorderTag
   | ResetFontSize
   | RestoreOpenNote
   | RestoreNote
