@@ -130,7 +130,7 @@ export class NoteEditor extends Component<Props> {
           Note last updated: {Math.floor((Date.now() - lastUpdated) / 1000)}s
           ago ({new Date(lastUpdated).toLocaleTimeString()})
         </div>
-        {editMode ? (
+        {editMode || !note.systemTags.includes('markdown') ? (
           <NoteDetail
             storeFocusEditor={this.storeFocusEditor}
             storeHasFocus={this.storeEditorHasFocus}
