@@ -94,35 +94,36 @@ class NoteContentEditor extends Component<Props> {
     window.monaco = monaco;
     this.editor = editor;
 
-    editor.deltaDecorations(
-      [],
-      [
-        {
-          range: new monaco.Range(1, 1, 1, 1),
-          options: {
-            isWholeLine: true,
-            inlineClassName: 'note-title',
-            stickiness:
-              Editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-          },
-        },
-      ]
-    );
-
-    editor.onDidChangeModelContent(() => {
-      editor.deltaDecorations(
-        [],
-        [
-          {
-            range: new monaco.Range(1, 1, 1, 1),
-            options: {
-              isWholeLine: true,
-              inlineClassName: 'note-title',
-            },
-          },
-        ]
-      );
+    const titleDecoration = (line: number) => ({
+      range: new monaco.Range(line, 1, line, 1),
+      options: {
+        isWholeLine: true,
+        inlineClassName: 'note-title',
+        stickiness: Editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+      },
     });
+
+    let decorations: string[] = [];
+    const decorateFirstLine = () => {
+      const model = editor.getModel();
+      if (!model) {
+        decorations = [];
+        return;
+      }
+
+      for (let i = 1; i <= model.getLineCount(); i++) {
+        const line = model.getLineContent(i);
+        if (line.trim().length > 0) {
+          decorations = editor.deltaDecorations(decorations, [
+            titleDecoration(i),
+          ]);
+          break;
+        }
+      }
+    };
+
+    decorateFirstLine();
+    editor.onDidChangeModelContent(() => decorateFirstLine());
 
     document.oncopy = (event) => {
       // @TODO: This is selecting everything in the app but we should only
