@@ -220,8 +220,7 @@ class NoteContentEditor extends Component<Props> {
   };
 
   render() {
-    const { fontSize, noteId, note, theme } = this.props;
-    const isMarkdown = note.systemTags.includes('markdown');
+    const { fontSize, noteId, theme } = this.props;
 
     return (
       <div
@@ -232,12 +231,13 @@ class NoteContentEditor extends Component<Props> {
         <Monaco
           key={noteId}
           editorDidMount={this.editorReady}
-          language={isMarkdown ? 'markdown' : 'plaintext'}
+          language="plaintext"
           theme={theme === 'dark' ? 'vs-dark' : 'vs'}
           onChange={this.updateNote}
           options={{
             autoClosingBrackets: 'never',
             autoClosingQuotes: 'never',
+            autoIndent: 'keep',
             autoSurround: 'never',
             automaticLayout: true,
             codeLens: false,
