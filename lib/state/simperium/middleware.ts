@@ -281,6 +281,7 @@ export const initSimperium = (
           );
         return result;
 
+      case 'INSERT_TASK_INTO_NOTE':
       case 'EDIT_NOTE':
         queueNoteUpdate(action.noteId);
         return result;

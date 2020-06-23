@@ -114,10 +114,10 @@ export class NoteCell extends Component<Props> {
           {'expanded' === displayMode && preview.length > 0 && (
             <div className="note-list-item-excerpt">
               {preview.split('\n').map((line, index) => (
-                <>
+                <React.Fragment key={index}>
                   {index > 0 && <br />}
                   {decorateWith(decorators, line.slice(0, 200))}
-                </>
+                </React.Fragment>
               ))}
             </div>
           )}

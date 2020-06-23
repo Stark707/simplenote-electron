@@ -15,8 +15,16 @@ export const middleware: S.Middleware = ({ dispatch, getState }) => {
         window.print();
         return;
 
+      case 'activateTheme':
+        dispatch(actions.settings.activateTheme(command.theme));
+        return;
+
       case 'focusSearchField':
         dispatch(actions.ui.focusSearchField());
+        return;
+
+      case 'insertChecklist':
+        dispatch({ type: 'INSERT_TASK' });
         return;
 
       case 'showDialog':
@@ -41,6 +49,14 @@ export const middleware: S.Middleware = ({ dispatch, getState }) => {
 
       case 'resetFontSize':
         dispatch(actions.settings.resetFontSize());
+        return;
+
+      case 'setNoteDisplay':
+        dispatch(actions.settings.setNoteDisplay(command.noteDisplay));
+        return;
+
+      case 'toggleSpellCheck':
+        dispatch(actions.settings.toggleSpellCheck());
         return;
 
       default:

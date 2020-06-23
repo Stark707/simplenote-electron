@@ -139,6 +139,14 @@ export type ImportNoteWithId = Action<
   'IMPORT_NOTE_WITH_ID',
   { noteId: T.EntityId; note: T.Note }
 >;
+export type InsertTask = Action<'INSERT_TASK'>;
+export type InsertTaskIntoNote = Action<
+  'INSERT_TASK_INTO_NOTE',
+  {
+    noteId: T.EntityId;
+    selection: [number, number, 'LTR' | 'RTL'];
+  }
+>;
 export type MarkdownNote = Action<
   'MARKDOWN_NOTE',
   { noteId: T.EntityId; shouldEnableMarkdown: boolean }
@@ -264,6 +272,8 @@ export type ActionType =
   | ImportNote
   | ImportNoteWithId
   | IncreaseFontSize
+  | InsertTask
+  | InsertTaskIntoNote
   | LoadRevisions
   | Logout
   | MarkdownNote

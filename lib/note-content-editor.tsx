@@ -30,6 +30,7 @@ type StateProps = {
 
 type DispatchProps = {
   editNote: (noteId: T.EntityId, changes: Partial<T.Note>) => any;
+  insertTask: () => any;
   storeEditorSelection: (
     noteId: T.EntityId,
     start: number,
@@ -55,6 +56,14 @@ class NoteContentEditor extends Component<Props> {
     return props.note.content !== state.content
       ? { content: withCheckboxCharacters(props.note.content) }
       : null;
+  }
+
+  componentDidMount() {
+    window.addEventListener('keydown', this.handleKeys, true);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('keydown', this.handleKeys, true);
   }
 
   componentDidUpdate(prevProps: Props) {
@@ -87,6 +96,24 @@ class NoteContentEditor extends Component<Props> {
       );
     }
   }
+
+  handleKeys = (event: KeyboardEvent) => {
+    if (!this.props.keyboardShortcuts) {
+      return;
+    }
+
+    const { code, ctrlKey, metaKey, shiftKey } = event;
+    const cmdOrCtrl = ctrlKey || metaKey;
+
+    if (cmdOrCtrl && shiftKey && 'KeyC' === code) {
+      this.props.insertTask();
+      event.stopPropagation();
+      event.preventDefault();
+      return false;
+    }
+
+    return true;
+  };
 
   editorReady: EditorDidMount = (editor, monaco) => {
     // @TODO remove these
@@ -285,6 +312,7 @@ const mapStateToProps: S.MapState<StateProps> = (state) => ({
 
 const mapDispatchToProps: S.MapDispatch<DispatchProps> = {
   editNote: actions.data.editNote,
+  insertTask: () => ({ type: 'INSERT_TASK' }),
   storeEditorSelection: (noteId, start, end, direction) => ({
     type: 'STORE_EDITOR_SELECTION',
     noteId,

@@ -39,6 +39,21 @@ export const middleware: S.Middleware = (store) => (
         note: action.note,
       });
 
+    case 'INSERT_TASK':
+      if (!state.ui.openedNote) {
+        return;
+      } else {
+        return next({
+          type: 'INSERT_TASK_INTO_NOTE',
+          noteId: state.ui.openedNote,
+          selection: state.ui.editorSelection.get(state.ui.openedNote) ?? [
+            0,
+            0,
+            'LTR',
+          ],
+        });
+      }
+
     case 'RESTORE_NOTE_REVISION': {
       const revision = state.data.noteRevisions
         .get(action.noteId)
