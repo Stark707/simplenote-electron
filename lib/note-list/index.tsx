@@ -327,7 +327,7 @@ export class NoteList extends Component<Props> {
 
 const mapStateToProps: S.MapState<StateProps> = (state) => {
   return {
-    hasLoaded: true,
+    hasLoaded: state.ui.hasLoadedNotes,
     isSmallScreen: selectors.isSmallScreen(state),
     keyboardShortcuts: state.settings.keyboardShortcuts,
     noteDisplay: state.settings.noteDisplay,

@@ -167,6 +167,16 @@ const filteredNotes: A.Reducer<T.EntityId[]> = (
   return action.meta.searchResults.noteIds;
 };
 
+const hasLoadedNotes: A.Reducer<boolean> = (state = false, action) => {
+  switch (action.type) {
+    case 'FILTER_NOTES':
+      return action.noteIds.length > 0 ? true : state;
+
+    default:
+      return state;
+  }
+};
+
 const openedNote: A.Reducer<T.EntityId | null> = (state = null, action) => {
   switch (action.type) {
     case 'CLOSE_NOTE':
@@ -329,6 +339,7 @@ export default combineReducers({
   editMode,
   editingTags,
   filteredNotes,
+  hasLoadedNotes,
   openedNote,
   openedRevision,
   openedTag,
