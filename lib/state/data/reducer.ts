@@ -204,6 +204,31 @@ export const tags: A.Reducer<[
   const [tagIds, tagNames] = state;
 
   switch (action.type) {
+    case 'ADD_NOTE_TAG':
+      if (tagNames.has(action.tagName.toLocaleLowerCase())) {
+        return state;
+      } else {
+        const tagId = uuid();
+        const nextTags = new Map(tagIds).set(tagId, { name: action.tagName });
+        const nextNames = new Map(tagNames).set(
+          action.tagName.toLocaleLowerCase(),
+          tagId
+        );
+
+        return [nextTags, nextNames];
+      }
+
+    case 'CONFIRM_NEW_TAG': {
+      const nextTags = new Map(tagIds).set(action.newTagId, action.tag);
+      const nextNames = new Map(tagNames);
+      nextTags.delete(action.originalTagId);
+      nextNames.delete(action.tagName);
+
+      nextNames.set(action.tag.name.toLocaleLowerCase(), action.newTagId);
+
+      return [nextTags, nextNames];
+    }
+
     case 'EDIT_NOTE': {
       if (
         !action.changes.tags?.some(
@@ -270,6 +295,7 @@ export const tags: A.Reducer<[
         return [nextTags, nextNames];
       } else {
         // insert a new tag
+        console.log(action);
         return [
           new Map(tagIds).set(action.tagId, action.tag),
           new Map(tagNames).set(

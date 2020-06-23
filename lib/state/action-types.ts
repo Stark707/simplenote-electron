@@ -183,6 +183,15 @@ export type ConfirmNewNote = Action<
   'CONFIRM_NEW_NOTE',
   { originalNoteId: T.EntityId; newNoteId: T.EntityId; note: T.Note }
 >;
+export type ConfirmNewTag = Action<
+  'CONFIRM_NEW_TAG',
+  {
+    originalTagId: T.EntityId;
+    newTagId: T.EntityId;
+    tagName: string;
+    tag: T.Tag;
+  }
+>;
 export type LoadRevisions = Action<
   'LOAD_REVISIONS',
   { noteId: T.EntityId; revisions: [number, T.Note][] }
@@ -234,6 +243,7 @@ export type ActionType =
   | CloseDialog
   | CloseRevision
   | ConfirmNewNote
+  | ConfirmNewTag
   | CreateNote
   | CreateNoteWithId
   | DecreaseFontSize

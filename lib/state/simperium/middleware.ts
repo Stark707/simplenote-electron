@@ -237,10 +237,22 @@ export const initSimperium = (
             nextState.data.tags[1].get(action.tagName.toLocaleLowerCase())
           );
         } else {
-          tagBucket.add(
-            nextState.data.tags[1].get(action.tagName.toLocaleLowerCase())
+          tagBucket.add({ name: action.tagName }).then((tag) =>
+            dispatch({
+              type: 'CONFIRM_NEW_TAG',
+              tagName: action.tagName,
+              originalTagId: nextState.data.tags[1].get(
+                action.tagName.toLocaleLowerCase()
+              ),
+              newTagId: tag.id,
+              tag: tag.data,
+            })
           );
         }
+        queueNoteUpdate(action.noteId);
+        return result;
+
+      case 'REMOVE_NOTE_TAG':
         queueNoteUpdate(action.noteId);
         return result;
 
