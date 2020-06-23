@@ -331,6 +331,18 @@ export const initSimperium = (
         });
         return result;
 
+      case 'TRASH_TAG': {
+        const tagId = prevState.data.tags[1].get(
+          action.tagName.toLocaleLowerCase()
+        );
+
+        if (tagId) {
+          tagBucket.remove(tagId);
+        }
+
+        return result;
+      }
+
       case 'LOGOUT':
         client.end();
         logout();

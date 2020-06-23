@@ -274,6 +274,10 @@ export const tags: A.Reducer<[
     }
 
     case 'REMOTE_TAG_DELETE': {
+      if (!tagIds.has(action.tagId)) {
+        return state;
+      }
+
       const nextTags = new Map(tagIds);
       nextTags.delete(action.tagId);
 
@@ -335,6 +339,21 @@ export const tags: A.Reducer<[
       nextTags.set(actionTagId, { ...actionTag, index: action.newIndex });
 
       return [nextTags, tagNames];
+    }
+
+    case 'TRASH_TAG': {
+      const nextTags = new Map(tagIds);
+      const nextNames = new Map(tagNames);
+      const tagId = tagNames.get(action.tagName.toLocaleLowerCase());
+
+      if (!tagId) {
+        return state;
+      }
+
+      nextTags.delete(tagId);
+      nextNames.delete(action.tagName.toLocaleLowerCase());
+
+      return [nextTags, nextNames];
     }
 
     default:

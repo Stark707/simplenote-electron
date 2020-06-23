@@ -120,7 +120,7 @@ export type TrashOpenNote = Action<'TRASH_OPEN_NOTE'>;
 export type WindowResize = Action<'WINDOW_RESIZE', { innerWidth: number }>;
 
 /*
- * Note operations
+ * Data operations
  */
 export type AddNoteTag = Action<
   'ADD_NOTE_TAG',
@@ -168,6 +168,7 @@ export type SetSystemTag = Action<
   'SET_SYSTEM_TAG',
   { note: T.NoteEntity; tagName: T.SystemTag; shouldHaveTag: boolean }
 >;
+export type TrashTag = Action<'TRASH_TAG', { tagName: string }>;
 
 /*
  * Simperium operations
@@ -319,6 +320,7 @@ export type ActionType =
   | ToggleTagDrawer
   | ToggleTagEditing
   | TrashNote
+  | TrashTag
   | TrashOpenNote
   | WindowResize;
 

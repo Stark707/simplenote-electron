@@ -27,6 +27,7 @@ type DispatchProps = {
   onEditTags: () => any;
   openTag: (tagId: T.EntityId) => any;
   reorderTag: (tagName: string, newIndex: number) => any;
+  trashTag: (tagName: string) => any;
 };
 
 type Props = StateProps & DispatchProps;
@@ -39,16 +40,18 @@ const SortableTag = SortableElement(
     editingActive,
     isSelected,
     selectTag,
+    trashTag,
     value: [tagId, tag],
   }: {
     allowReordering: boolean;
     editingActive: boolean;
     isSelected: boolean;
     selectTag: (tagId: T.EntityId) => any;
+    trashTag: (tagName: string) => any;
     value: [T.EntityId, T.Tag];
   }) => (
     <li key={tagId} className="tag-list-item" data-tag-name={tag.name}>
-      {editingActive && <TrashIcon />}
+      {editingActive && <TrashIcon onClick={() => trashTag(tag.name)} />}
       <TagListInput
         editable={editingActive}
         isSelected={isSelected}
@@ -68,12 +71,14 @@ const SortableTagList = SortableContainer(
     openedTag,
     openTag,
     sortTagsAlpha,
+    trashTheTag,
   }: {
     editingTags: boolean;
     items: [T.EntityId, T.Tag][];
     openedTag: T.EntityId | null;
     openTag: (tagId: T.EntityId) => any;
     sortTagsAlpha: boolean;
+    trashTheTag: (tagName: string) => any;
   }) => (
     <ul className="tag-list-items">
       {items.map((value, index) => (
@@ -84,6 +89,7 @@ const SortableTagList = SortableContainer(
           index={index}
           isSelected={openedTag === value[0]}
           selectTag={openTag}
+          trashTag={trashTheTag}
           value={value}
         />
       ))}
@@ -108,6 +114,7 @@ export class TagList extends Component<Props> {
       openedTag,
       sortTagsAlpha,
       tags,
+      trashTag,
     } = this.props;
 
     const classes = classNames('tag-list', {
@@ -147,6 +154,7 @@ export class TagList extends Component<Props> {
           sortTagsAlpha={sortTagsAlpha}
           onSortEnd={this.reorderTag}
           useDragHandle={true}
+          trashTheTag={trashTag}
         />
       </div>
     );
@@ -171,6 +179,10 @@ const mapDispatchToProps: S.MapDispatch<DispatchProps> = {
     type: 'REORDER_TAG',
     tagName,
     newIndex,
+  }),
+  trashTag: (tagName) => ({
+    type: 'TRASH_TAG',
+    tagName,
   }),
 };
 
