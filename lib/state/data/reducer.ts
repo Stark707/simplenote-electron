@@ -326,12 +326,11 @@ export const tags: A.Reducer<[
 
         const nextNames = new Map(tagNames);
         nextNames.delete(tagIds.get(action.tagId).name.toLocaleLowerCase());
-        nextNames.set(action.tag.name, action.tagId);
+        nextNames.set(action.tag.name.toLocaleLowerCase(), action.tagId);
 
         return [nextTags, nextNames];
       } else {
         // insert a new tag
-        console.log(action);
         return [
           new Map(tagIds).set(action.tagId, action.tag),
           new Map(tagNames).set(

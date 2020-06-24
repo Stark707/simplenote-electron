@@ -2,6 +2,8 @@ import { default as createClient } from 'simperium';
 
 import debugFactory from 'debug';
 import actions from '../actions';
+import { InMemoryBucket } from './functions/in-memory-bucket';
+import { InMemoryGhost } from './functions/in-memory-ghost';
 import { NoteBucket } from './functions/note-bucket';
 import { NoteGhost } from './functions/note-ghost';
 import { TagBucket } from './functions/tag-bucket';
@@ -13,95 +15,6 @@ import * as S from '../';
 import * as T from '../../types';
 
 const debug = debugFactory('simperium-middleware');
-
-/**
- * An in memory implementation of GhostStore
- *
- * @param {Bucket} bucket instance to save ghost data for
- */
-export default function GhostStore(bucket) {
-  this.bucket = bucket;
-  this.index = {};
-}
-
-GhostStore.prototype.getChangeVersion = function () {
-  return new Promise((resolve) => {
-    setImmediate(() => {
-      resolve(this.cv);
-    });
-  });
-};
-
-GhostStore.prototype.setChangeVersion = function (cv) {
-  return new Promise((resolve) => {
-    setImmediate(() => {
-      this.cv = cv;
-      resolve(cv);
-    });
-  });
-};
-
-GhostStore.prototype.put = function (id, version, data) {
-  return new Promise((resolve) => {
-    setImmediate(() => {
-      this.index[id] = JSON.stringify({ version: version, data: data });
-      resolve(true);
-    });
-  });
-};
-
-GhostStore.prototype.get = function (id) {
-  return new Promise((resolve) => {
-    setImmediate(() => {
-      var ghost = this.index[id];
-      if (!ghost) {
-        ghost = { data: {} };
-        ghost.key = id;
-        this.index[id] = JSON.stringify(ghost);
-      } else {
-        ghost = JSON.parse(ghost);
-      }
-      resolve(ghost);
-    });
-  });
-};
-
-GhostStore.prototype.remove = function (id) {
-  return new Promise((resolve) => {
-    setImmediate(() => {
-      delete this.index[id];
-      resolve();
-    });
-  });
-};
-
-function BucketStore() {
-  this.objects = {};
-}
-
-BucketStore.prototype.get = function (id, callback) {
-  callback(null, { id: id, data: this.objects[id] });
-};
-
-BucketStore.prototype.update = function (id, object, isIndexing, callback) {
-  this.objects[id] = object;
-  callback(null, { id: id, data: object, isIndexing: isIndexing });
-};
-
-BucketStore.prototype.remove = function (id, callback) {
-  delete this.objects[id];
-  callback(null);
-};
-
-// TODO: build a query interface
-BucketStore.prototype.find = function (query, callback) {
-  var objects = [];
-  var key;
-  for (key in this.objects) {
-    objects.push({ id: key, data: this.objects[key] });
-  }
-  callback(null, objects);
-};
 
 type Buckets = {
   note: T.Note;
@@ -124,7 +37,7 @@ export const initSimperium = (
           return new NoteBucket(store);
 
         case 'preferences':
-          return new BucketStore();
+          return new InMemoryBucket();
 
         case 'tag':
           return new TagBucket(store);
@@ -137,7 +50,7 @@ export const initSimperium = (
 
         case 'preferences':
         case 'tag':
-          return new GhostStore(bucket);
+          return new InMemoryGhost();
       }
     },
   });
@@ -324,6 +237,16 @@ export const initSimperium = (
       case 'DELETE_NOTE_FOREVER':
         setTimeout(() => noteBucket.remove(action.noteId), 10);
         return result;
+
+      case 'RENAME_TAG': {
+        const tagId = prevState.data.tags[1].get(
+          action.oldTagName.toLocaleLowerCase()
+        );
+        if (tagId) {
+          queueTagUpdate(tagId);
+        }
+        return result;
+      }
 
       case 'REORDER_TAG':
         // if one tag changes order we likely have to synchronize all tags…
