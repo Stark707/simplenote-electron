@@ -99,6 +99,18 @@ export const initSimperium = (
     });
   });
 
+  const preferencesBucket = client.bucket('preferences');
+  preferencesBucket.channel.on('update', (entityId, updatedEntity) => {
+    if ('preferences-key' !== entityId) {
+      return;
+    }
+
+    dispatch({
+      type: 'SET_ANALYTICS',
+      allowAnalytics: !!updatedEntity.analytics_enabled,
+    });
+  });
+
   if (createWelcomeNote) {
     import(
       /* webpackChunkName: 'welcome-message' */ '../../welcome-message'
@@ -252,6 +264,32 @@ export const initSimperium = (
         // if one tag changes order we likely have to synchronize all tags…
         nextState.data.tags[0].forEach((tag, tagId) => {
           queueTagUpdate(tagId);
+        });
+        return result;
+
+      case 'SET_ANALYTICS':
+        preferencesBucket.get('preferences-key').then((preferences) => {
+          preferencesBucket.update(
+            'preferences-key',
+            {
+              ...preferences.data,
+              analytics_enabled: action.allowAnalytics,
+            },
+            { sync: true }
+          );
+        });
+        return result;
+
+      case 'TOGGLE_ANALYTICS':
+        preferencesBucket.get('preferences-key').then((preferences) => {
+          preferencesBucket.update(
+            'preferences-key',
+            {
+              ...preferences.data,
+              analytics_enabled: !preferences.data.analytics_enabled,
+            },
+            { sync: true }
+          );
         });
         return result;
 
