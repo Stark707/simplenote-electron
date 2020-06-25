@@ -45,14 +45,6 @@ const ghosts: A.Reducer<[
   }
 };
 
-const noteChangeVersion: A.Reducer<ChangeVersion | null> = (
-  state = null,
-  action
-) =>
-  action.type === 'SET_CHANGE_VERSION' && action.bucketName === 'note'
-    ? action.cv ?? null
-    : state;
-
 const lastSync: A.Reducer<Map<T.EntityId, number>> = (
   state = emptyMap as Map<T.EntityId, number>,
   action
@@ -89,7 +81,6 @@ const lastRemoteUpdate: A.Reducer<Map<T.EntityId, number>> = (
 export default combineReducers({
   connectionStatus,
   ghosts,
-  noteChangeVersion,
   lastSync,
   lastRemoteUpdate,
 });
