@@ -143,7 +143,7 @@ export const middleware: S.Middleware = ({ dispatch, getState }) => (next) => {
   let worker: ReturnType<typeof setTimeout> | null = null;
 
   return (action: A.ActionType) => {
-    const restult = next(action);
+    const result = next(action);
 
     if (worker) {
       clearTimeout(worker);
@@ -154,6 +154,6 @@ export const middleware: S.Middleware = ({ dispatch, getState }) => (next) => {
       persistRevisions(action.noteId, action.revisions);
     }
 
-    return restult;
+    return result;
   };
 };
