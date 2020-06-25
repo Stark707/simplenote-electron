@@ -90,7 +90,9 @@ export class RevisionSelector extends Component<Props> {
         <div className="revision-slider">
           <Slider
             disabled={!revisions || revisions.size === 0}
-            min={0}
+            min={
+              1 /* don't allow reverting to the very first version because that's a blank note */
+            }
             max={revisions?.size - 1}
             value={selectedIndex > -1 ? selectedIndex : revisions?.size - 1}
             onChange={this.onSelectRevision}

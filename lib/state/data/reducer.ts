@@ -221,8 +221,14 @@ export const noteRevisions: A.Reducer<Map<T.EntityId, Map<number, T.Note>>> = (
   action
 ) => {
   switch (action.type) {
-    case 'LOAD_REVISIONS':
-      return new Map(state).set(action.noteId, new Map(action.revisions));
+    case 'LOAD_REVISIONS': {
+      // merge the new revisions - we might have fewer inbound than we have stored
+      const stored = state.get(action.noteId) ?? new Map();
+      const next = new Map(stored);
+      action.revisions.forEach(([version, note]) => next.set(version, note));
+
+      return new Map(state).set(action.noteId, next);
+    }
 
     default:
       return state;

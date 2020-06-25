@@ -50,8 +50,8 @@ export type State = {
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 export const makeStore = (...middlewares: Middleware[]) =>
-  persistence.loadState().then((data) => {
-    const store = createStore<State, A.ActionType, {}, {}>(
+  persistence.loadState().then((data) =>
+    createStore<State, A.ActionType, {}, {}>(
       reducers,
       data,
       composeEnhancers(
@@ -73,10 +73,8 @@ export const makeStore = (...middlewares: Middleware[]) =>
           persistence.middleware
         )
       )
-    );
-
-    return store;
-  });
+    )
+  );
 
 export type Store = {
   dispatch: Dispatch;
