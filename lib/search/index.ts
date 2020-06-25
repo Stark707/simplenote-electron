@@ -29,6 +29,16 @@ type SearchState = {
   sortReversed: boolean;
 };
 
+const toSearchNote = (note: Partial<T.Note>): SearchNote => ({
+  content: note.content?.toLocaleLowerCase() ?? '',
+  casedContent: note.content ?? '',
+  tags: new Set(note.tags?.map((tag) => tag.toLocaleLowerCase()) ?? []),
+  creationDate: note.creationDate ?? Date.now() / 1000,
+  modificationDate: note.modificationDate ?? Date.now() / 1000,
+  isPinned: note.systemTags?.includes('pinned') ?? false,
+  isTrashed: !!note.deleted ?? false,
+});
+
 const tagsFromSearch = (query: string) => {
   const tagPattern = /(?:\btag:)([^\s,]+)/g;
   const searchTags = new Set<T.TagName>();
@@ -270,6 +280,12 @@ export const middleware: S.Middleware = (store) => {
     }, 30);
   };
 
+  store.getState().data.notes.forEach((note, noteId) => {
+    searchState.notes.set(noteId, toSearchNote(note));
+    indexNote(noteId);
+  });
+  queueSearch();
+
   return (rawNext) => (action: A.ActionType) => {
     const state = store.getState();
 
@@ -290,16 +306,6 @@ export const middleware: S.Middleware = (store) => {
 
       return rawNext(action);
     };
-
-    const toSearchNote = (note: Partial<T.Note>): SearchNote => ({
-      content: note.content?.toLocaleLowerCase() ?? '',
-      casedContent: note.content ?? '',
-      tags: new Set(note.tags?.map((tag) => tag.toLocaleLowerCase()) ?? []),
-      creationDate: note.creationDate ?? Date.now() / 1000,
-      modificationDate: note.modificationDate ?? Date.now() / 1000,
-      isPinned: note.systemTags?.includes('pinned') ?? false,
-      isTrashed: !!note.deleted ?? false,
-    });
 
     switch (action.type) {
       case 'CONFIRM_NEW_NOTE': {

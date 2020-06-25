@@ -16,6 +16,7 @@ import persistState from 'redux-localstorage';
 import { omit } from 'lodash';
 import { isElectron } from '../utils/platform';
 
+import * as persistence from './persistence';
 import dataMiddleware from './data/middleware';
 import electronMiddleware from './electron/middleware';
 import { middleware as searchMiddleware } from '../search';
@@ -49,27 +50,33 @@ export type State = {
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 export const makeStore = (...middlewares: Middleware[]) =>
-  createStore<State, A.ActionType, {}, {}>(
-    reducers,
-    composeEnhancers(
-      persistState('settings', {
-        key: 'simpleNote',
-        slicer: (path) => (state) => ({
-          // Omit property from persisting
-          [path]: omit(state[path], ['accountName', 'focusModeEnabled']),
+  persistence.loadState().then((data) => {
+    const store = createStore<State, A.ActionType, {}, {}>(
+      reducers,
+      data,
+      composeEnhancers(
+        persistState('settings', {
+          key: 'simpleNote',
+          slicer: (path) => (state) => ({
+            // Omit property from persisting
+            [path]: omit(state[path], ['accountName', 'focusModeEnabled']),
+          }),
         }),
-      }),
-      applyMiddleware(
-        dataMiddleware,
-        browserMiddleware,
-        searchMiddleware,
-        searchFieldMiddleware,
-        uiMiddleware,
-        ...(isElectron ? [electronMiddleware] : []),
-        ...middlewares
+        applyMiddleware(
+          dataMiddleware,
+          browserMiddleware,
+          searchMiddleware,
+          searchFieldMiddleware,
+          uiMiddleware,
+          ...(isElectron ? [electronMiddleware] : []),
+          ...middlewares,
+          persistence.middleware
+        )
       )
-    )
-  );
+    );
+
+    return store;
+  });
 
 export type Store = {
   dispatch: Dispatch;
