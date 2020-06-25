@@ -3,9 +3,8 @@ import { default as createClient } from 'simperium';
 import debugFactory from 'debug';
 import actions from '../actions';
 import { InMemoryBucket } from './functions/in-memory-bucket';
-import { InMemoryGhost } from './functions/in-memory-ghost';
 import { NoteBucket } from './functions/note-bucket';
-import { NoteGhost } from './functions/note-ghost';
+import { ReduxGhost } from './functions/redux-ghost';
 import { TagBucket } from './functions/tag-bucket';
 import { start as startConnectionMonitor } from './functions/connection-monitor';
 import { getAccountName } from './functions/username-monitor';
@@ -43,16 +42,7 @@ export const initSimperium = (
           return new TagBucket(store);
       }
     },
-    ghostStoreProvider: (bucket) => {
-      switch (bucket.name) {
-        case 'note':
-          return new NoteGhost(store);
-
-        case 'preferences':
-        case 'tag':
-          return new InMemoryGhost();
-      }
-    },
+    ghostStoreProvider: (bucket) => new ReduxGhost(bucket.name, store),
   });
   client.on('unauthorized', () => logout());
 

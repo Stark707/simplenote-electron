@@ -1,4 +1,4 @@
-import type { ChangeVersion, Ghost, RemoteInfo } from 'simperium';
+import type { ChangeVersion, EntityId, Ghost, RemoteInfo } from 'simperium';
 import * as T from '../types';
 
 export type Action<
@@ -209,6 +209,25 @@ export type ConfirmNewTag = Action<
     tag: T.Tag;
   }
 >;
+export type GhostRemoveEntity = Action<
+  'GHOST_REMOVE_ENTITY',
+  { bucketName: string; entityId: EntityId }
+>;
+export type GhostSetChangeVersion = Action<
+  'GHOST_SET_CHANGE_VERSION',
+  {
+    bucketName: string;
+    version: ChangeVersion;
+  }
+>;
+export type GhostSetEntity = Action<
+  'GHOST_SET_ENTITY',
+  {
+    bucketName: string;
+    entityId: EntityId;
+    ghost: Ghost<unknown>;
+  }
+>;
 export type LoadRevisions = Action<
   'LOAD_REVISIONS',
   { noteId: T.EntityId; revisions: [number, T.Note][] }
@@ -221,10 +240,6 @@ export type RemoteNoteDeleteForever = Action<
   'REMOTE_NOTE_DELETE_FOREVER',
   { noteId: T.EntityId }
 >;
-export type RemoveNoteGhost = Action<
-  'REMOVE_NOTE_GHOST',
-  { noteId: T.EntityId }
->;
 export type RemoteTagDelete = Action<
   'REMOTE_TAG_DELETE',
   { tagId: T.EntityId }
@@ -232,10 +247,6 @@ export type RemoteTagDelete = Action<
 export type RemoteTagUpdate = Action<
   'REMOTE_TAG_UPDATE',
   { tagId: T.EntityId; tag: T.Tag; remoteInfo?: RemoteInfo<T.Tag> }
->;
-export type SaveNoteGhost = Action<
-  'SAVE_NOTE_GHOST',
-  { noteId: T.EntityId; ghost: Ghost<T.Note> }
 >;
 export type SetChangeVersion = Action<
   'SET_CHANGE_VERSION',
@@ -269,6 +280,9 @@ export type ActionType =
   | EditNote
   | FilterNotes
   | FocusSearchField
+  | GhostRemoveEntity
+  | GhostSetChangeVersion
+  | GhostSetEntity
   | ImportNote
   | ImportNoteWithId
   | IncreaseFontSize
@@ -286,7 +300,6 @@ export type ActionType =
   | RemoteNoteDeleteForever
   | RemoteTagDelete
   | RemoteTagUpdate
-  | RemoveNoteGhost
   | RemoveNoteTag
   | RenameTag
   | ReorderTag
@@ -294,7 +307,6 @@ export type ActionType =
   | RestoreOpenNote
   | RestoreNote
   | RestoreNoteRevision
-  | SaveNoteGhost
   | Search
   | SelectNote
   | SelectNoteAbove

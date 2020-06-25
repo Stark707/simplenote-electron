@@ -36,5 +36,5 @@ export const noteHasPendingChanges: S.Selector<boolean> = (
 ) =>
   !notesAreEqual(
     state.data.notes.get(noteId),
-    state.simperium.noteGhosts.get(noteId)?.data
+    state.simperium.ghosts[1].get('note')?.get(noteId)?.data
   );

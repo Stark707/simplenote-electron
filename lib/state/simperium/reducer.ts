@@ -1,6 +1,6 @@
 import { combineReducers } from 'redux';
 
-import type { ChangeVersion, Ghost } from 'simperium';
+import type { ChangeVersion, EntityId, Ghost } from 'simperium';
 import * as A from '../action-types';
 import * as T from '../../types';
 
@@ -11,6 +11,40 @@ const connectionStatus: A.Reducer<T.ConnectionState> = (
   action
 ) => (action.type === 'CHANGE_CONNECTION_STATUS' ? action.status : state);
 
+const ghosts: A.Reducer<[
+  Map<string, ChangeVersion>,
+  Map<string, Map<EntityId, Ghost<unknown>>>
+]> = (state = [new Map(), new Map()], action) => {
+  switch (action.type) {
+    case 'GHOST_REMOVE_ENTITY': {
+      const [cvs, buckets] = state;
+      const bucket = buckets.get(action.bucketName) ?? new Map();
+      const nextBucket = new Map(bucket);
+      nextBucket.delete(action.entityId);
+
+      return [cvs, new Map(buckets).set(action.bucketName, nextBucket)];
+    }
+
+    case 'GHOST_SET_CHANGE_VERSION': {
+      const [cvs, buckets] = state;
+      const nextCvs = new Map(cvs).set(action.bucketName, action.version);
+
+      return [nextCvs, buckets];
+    }
+
+    case 'GHOST_SET_ENTITY': {
+      const [cvs, buckets] = state;
+      const bucket = buckets.get(action.bucketName) ?? new Map();
+      const nextBucket = new Map(bucket).set(action.entityId, action.ghost);
+
+      return [cvs, new Map(buckets).set(action.bucketName, nextBucket)];
+    }
+
+    default:
+      return state;
+  }
+};
+
 const noteChangeVersion: A.Reducer<ChangeVersion | null> = (
   state = null,
   action
@@ -18,29 +52,6 @@ const noteChangeVersion: A.Reducer<ChangeVersion | null> = (
   action.type === 'SET_CHANGE_VERSION' && action.bucketName === 'note'
     ? action.cv ?? null
     : state;
-
-const noteGhosts: A.Reducer<Map<T.EntityId, Ghost<T.Note>>> = (
-  state = emptyMap as Map<T.EntityId, Ghost<T.Note>>,
-  action
-) => {
-  switch (action.type) {
-    case 'REMOVE_NOTE_GHOST': {
-      if (!state.has(action.noteId)) {
-        return state;
-      }
-
-      const next = new Map(state);
-      next.delete(action.noteId);
-      return next;
-    }
-
-    case 'SAVE_NOTE_GHOST':
-      return new Map(state).set(action.noteId, action.ghost);
-
-    default:
-      return state;
-  }
-};
 
 const lastSync: A.Reducer<Map<T.EntityId, number>> = (
   state = emptyMap as Map<T.EntityId, number>,
@@ -77,8 +88,8 @@ const lastRemoteUpdate: A.Reducer<Map<T.EntityId, number>> = (
 
 export default combineReducers({
   connectionStatus,
+  ghosts,
   noteChangeVersion,
-  noteGhosts,
   lastSync,
   lastRemoteUpdate,
 });
