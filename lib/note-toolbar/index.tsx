@@ -17,6 +17,7 @@ import * as T from '../types';
 
 type StateProps = {
   editMode: boolean;
+  hasRevisions: boolean;
   markdownEnabled: boolean;
   note: T.Note | null;
 };
@@ -49,7 +50,13 @@ export class NoteToolbar extends Component<Props> {
   }
 
   renderNormal = () => {
-    const { editMode, markdownEnabled, note, toggleNoteInfo } = this.props;
+    const {
+      editMode,
+      hasRevisions,
+      markdownEnabled,
+      note,
+      toggleNoteInfo,
+    } = this.props;
     return !note ? (
       <div className="note-toolbar-placeholder theme-color-border" />
     ) : (
@@ -82,9 +89,10 @@ export class NoteToolbar extends Component<Props> {
           )}
           <div className="note-toolbar__button">
             <IconButton
+              disabled={!hasRevisions}
               icon={<RevisionsIcon />}
               onClick={this.props.toggleRevisions}
-              title="History"
+              title={hasRevisions ? 'History' : 'History (unavailable)'}
             />
           </div>
           <div className="note-toolbar__button">
@@ -156,6 +164,7 @@ const mapStateToProps: S.MapState<StateProps> = ({
 
   return {
     editMode,
+    hasRevisions: !!data.noteRevisions.get(openedNote)?.size,
     markdownEnabled: note?.systemTags.includes('markdown') || false,
     note,
   };
