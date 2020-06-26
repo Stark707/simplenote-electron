@@ -9,6 +9,8 @@ import * as selectors from './state/selectors';
 import * as S from './state';
 import * as T from './types';
 
+const SPEED_DELAY = 120;
+
 const withCheckboxCharacters = (s: string): string =>
   s
     .replace(/^(\s*)- \[ \](\s)/gm, '$1\ue000$2')
@@ -43,6 +45,9 @@ type Props = StateProps & DispatchProps;
 
 type OwnState = {
   content: string;
+  editor: 'fast' | 'full';
+  noteId: T.EntityId | null;
+  overTodo: boolean;
 };
 
 class NoteContentEditor extends Component<Props> {
@@ -50,16 +55,36 @@ class NoteContentEditor extends Component<Props> {
 
   state: OwnState = {
     content: '',
+    editor: 'fast',
+    noteId: null,
+    overTodo: false,
   };
 
   static getDerivedStateFromProps(props: Props, state: OwnState) {
+    if (props.noteId !== state.noteId) {
+      return {
+        content: props.note.content.slice(0, props.editorSelection[1] + 5000),
+        editor: 'fast',
+        noteId: props.noteId,
+      };
+    }
+
     return props.note.content !== state.content
       ? { content: withCheckboxCharacters(props.note.content) }
       : null;
   }
 
   componentDidMount() {
+    const { noteId } = this.props;
     window.addEventListener('keydown', this.handleKeys, true);
+    setTimeout(() => {
+      if (noteId === this.props.noteId) {
+        this.setState({
+          editor: 'full',
+          content: withCheckboxCharacters(this.props.note.content),
+        });
+      }
+    }, SPEED_DELAY);
   }
 
   componentWillUnmount() {
@@ -71,11 +96,13 @@ class NoteContentEditor extends Component<Props> {
       editorSelection: [prevStart, prevEnd, prevDirection],
     } = prevProps;
     const {
+      noteId,
       editorSelection: [thisStart, thisEnd, thisDirection],
     } = this.props;
 
     if (
       this.editor &&
+      this.state.editor === 'full' &&
       (prevStart !== thisStart ||
         prevEnd !== thisEnd ||
         prevDirection !== thisDirection)
@@ -94,6 +121,20 @@ class NoteContentEditor extends Component<Props> {
             : SelectionDirection.LTR
         )
       );
+    }
+
+    // @TODO is this really a smart thing? It's super fast when navigating
+    //       through the notes but also could be jerky and sensitive to
+    //       tuning of the delay
+    if (this.state.editor === 'fast') {
+      setTimeout(() => {
+        if (noteId === this.props.noteId) {
+          this.setState({
+            editor: 'full',
+            content: withCheckboxCharacters(this.props.note.content),
+          });
+        }
+      }, SPEED_DELAY);
     }
   }
 
@@ -248,48 +289,55 @@ class NoteContentEditor extends Component<Props> {
 
   render() {
     const { fontSize, noteId, theme } = this.props;
+    const { content, editor, overTodo } = this.state;
 
     return (
       <div
         className={`note-content-editor-shell${
-          this.state.overTodo ? ' cursor-pointer' : ''
+          overTodo ? ' cursor-pointer' : ''
         }`}
       >
-        <Monaco
-          key={noteId}
-          editorDidMount={this.editorReady}
-          language="plaintext"
-          theme={theme === 'dark' ? 'vs-dark' : 'vs'}
-          onChange={this.updateNote}
-          options={{
-            autoClosingBrackets: 'never',
-            autoClosingQuotes: 'never',
-            autoIndent: 'keep',
-            autoSurround: 'never',
-            automaticLayout: true,
-            codeLens: false,
-            contextmenu: false,
-            folding: false,
-            fontFamily:
-              '"Simplenote Tasks", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen-Sans", "Ubuntu", "Cantarell", "Helvetica Neue", sans-serif',
-            fontSize,
-            hideCursorInOverviewRuler: true,
-            lineHeight: fontSize > 20 ? 42 : 24,
-            lineNumbers: 'off',
-            links: true,
-            minimap: { enabled: false },
-            occurrencesHighlight: false,
-            overviewRulerBorder: false,
-            quickSuggestions: false,
-            renderIndentGuides: false,
-            renderLineHighlight: 'none',
-            scrollbar: { horizontal: 'hidden' },
-            selectionHighlight: false,
-            wordWrap: 'on',
-            wrappingStrategy: 'advanced',
-          }}
-          value={this.state.content}
-        />
+        {editor === 'fast' ? (
+          <div style={{ padding: '0.7em', whiteSpace: 'pre-wrap' }}>
+            {content}
+          </div>
+        ) : (
+          <Monaco
+            key={noteId}
+            editorDidMount={this.editorReady}
+            language="plaintext"
+            theme={theme === 'dark' ? 'vs-dark' : 'vs'}
+            onChange={this.updateNote}
+            options={{
+              autoClosingBrackets: 'never',
+              autoClosingQuotes: 'never',
+              autoIndent: 'keep',
+              autoSurround: 'never',
+              automaticLayout: true,
+              codeLens: false,
+              contextmenu: false,
+              folding: false,
+              fontFamily:
+                '"Simplenote Tasks", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen-Sans", "Ubuntu", "Cantarell", "Helvetica Neue", sans-serif',
+              fontSize,
+              hideCursorInOverviewRuler: true,
+              lineHeight: fontSize > 20 ? 42 : 24,
+              lineNumbers: 'off',
+              links: true,
+              minimap: { enabled: false },
+              occurrencesHighlight: false,
+              overviewRulerBorder: false,
+              quickSuggestions: false,
+              renderIndentGuides: false,
+              renderLineHighlight: 'none',
+              scrollbar: { horizontal: 'hidden' },
+              selectionHighlight: false,
+              wordWrap: 'on',
+              wrappingStrategy: 'advanced',
+            }}
+            value={content}
+          />
+        )}
       </div>
     );
   }

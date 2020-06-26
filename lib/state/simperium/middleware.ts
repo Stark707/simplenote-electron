@@ -210,15 +210,19 @@ export const initSimperium = (
           getState().ui.openedNote;
 
         if (noteId) {
-          noteBucket.getRevisions(noteId).then((revisions) => {
-            dispatch({
-              type: 'LOAD_REVISIONS',
-              noteId: noteId,
-              revisions: revisions
-                .map(({ data, version }) => [version, data])
-                .sort((a, b) => a[0] - b[0]),
-            });
-          });
+          setTimeout(() => {
+            if (getState().ui.openedNote === noteId) {
+              noteBucket.getRevisions(noteId).then((revisions) => {
+                dispatch({
+                  type: 'LOAD_REVISIONS',
+                  noteId: noteId,
+                  revisions: revisions
+                    .map(({ data, version }) => [version, data])
+                    .sort((a, b) => a[0] - b[0]),
+                });
+              });
+            }
+          }, 250);
         }
 
         return result;
