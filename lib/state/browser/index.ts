@@ -39,14 +39,12 @@ export const middleware: S.Middleware = ({ dispatch }) => {
     })
   );
 
-  window
-    .matchMedia('(prefers-color-scheme: dark)')
-    .addEventListener('change', () =>
-      dispatch({
-        type: 'SYSTEM_THEME_UPDATE',
-        prefers: getTheme(),
-      })
-    );
+  window.matchMedia('(prefers-color-scheme: dark)').addListener(() =>
+    dispatch({
+      type: 'SYSTEM_THEME_UPDATE',
+      prefers: getTheme(),
+    })
+  );
 
   return (next) => next;
 };
